@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="ftFOlJETX-2KNjaPh8W6s8lhigItRuu9fOmjHZZ0nY0" />
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+  <title>ARVC: An Auto-Regressive Voice Conversion System Without Parallel Training Data</title>
+</head>
+<style type="text/css">
+  table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  audio {
+    width: 100%;
+  }
+
+  thead>tr>th:first-child {
+    width: 96px;
+  }
+
+  @media (max-width: 767px) {
+    .big-screen {
+      display: none;
+    }
+  }
+
+  @media (min-width: 767px) {
+    .small-screen {
+      display: none;
+    }
+  }
+</style>
+
+<body>
+  <header class="header">
+    <div class="jumbotron bg-secondary text-center">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-12">
+            <h1><a class="text-light">
+				ARVC: An Auto-Regressive Voice Conversion System Without Parallel Training Data <br> (Submitted to Interspeech2020)</a></h1>
+            <p>
+              <div class="row">
+                <div class="col-md col-sm-12"><a class="text-light">Zheng Lian</a> </div>
+              </div>
+            </p>
+			<p><a class="text-light">National Laboratory of Pattern Recognition, CASIA, Beijing, China<br>
+                CAS Center for Excellence in Brain Science and Intelligence Technology, Beijing, China<br>
+				School of Artificial Intelligence, University of Chinese Academy of Sciences, Beijing, China
+				</p></a>
+				
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <div class="row" id="average">
+        <div class="col">
+          <h2>Proposed Method</h2>
+          <div>
+            <p>
+            A block diagram of our auto-regressive model for voice conversion is shown in Figure 1. 
+            It consists of three key components: (1) Encoder; (2) Decoder; (3) Waveform synthesis. 
+            Specifically, we use the frame-level linguistic features, PPGs, as the inputs. 
+            The encoder maps input PPGs into context-dependent representations. 
+            Then the decoder predicts acoustic features from the encoder outputs. 
+            In the end, the LPCNet vocoder is conditioned on the predicted acoustic features for speech generation.</p>
+            
+            <p>
+            Compared with conventional seq2seq base VC, ARVC removes the attention-based duration conversion module since PPGs 
+            already contain duration information, thus reducing mispronunciation and improving training stability. 
+            Compared with conventional PPGs based VC, 
+            ARVC takes previous step acoustic features as the inputs to produce the next step outputs via the auto-regressive structure, 
+            thus generating smooth trajectory and causing less voice errors. 
+            </p>
+          
+            
+            <div align="center">
+            <img id="img2" src="./image/1.png" class="img-fluid" style="width:70%"
+              alt="Proposed system framework">
+            <figcaption class="figure-caption text-center">
+              Block diagram of the ARVC system architecture. 
+              It includes an encoder that maps input PPGs to high-level representations, 
+              and an decoder that predicts acoustic features. 
+              Finally, the LPCNet vocoder is conditioned on the predicted acoustic features for speech synthesis.
+			</div>
+			
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row" id="average">
+        <div class="col">
+          <h2>Comparison System</h2>
+          <div>
+            <p>
+            Two comparison systems are also implemented to verify the effectiveness of our proposed method. 
+            </p>
+          
+            <p>
+            <b>System I <a class="text-success" href="#1">[1]</a></b>: It employs SI-ASR and Kullback-Leibler Divergence (KLD) based mapping approach to voice 
+            conversion without using parallel training data. The acoustic difference between source and target speakers 
+            is equalized with SI-ASR. KLD is chosen as a distortion measure to find an appropriate mapping from each 
+            input source speaker’s frame to that of the target speaker. Finally, the STRAIGHT vocoder is used to generate the converted waveform.
+			<br>
+            <b>System II <a class="text-success" href="#1">[2]</a></b>: It achieves top rank on naturalness and similarity in Voice Conversion Challenge 2018. 
+            Firstly, the acoustic features of the source speaker (including Mel-cepstral coefficients (MCCs), F0 and band aperiodicities (BAPs))
+            are converted toward the target speaker using an LSTM-based conversion model. 
+            Then, the waveform samples of the converted speech are synthesized by sending 
+            the converted acoustic features into the WaveNet vocoder built for the target speaker.
+            We try our best to reproduce the work in <a class="text-success" href="#1">[2]</a>. 
+            However, compared with the original system in <a class="text-success" href="#1">[2]</a>, there are still two major differences: 
+            (1) There is no manually correction for F0 extraction errors, nor removal of speech segments with irregular phonation. 
+            (2) Due to limited training data for VC, Liu et al. <a class="text-success" href="#1">[2]</a> train a speaker-dependent WaveNet by adapting a pre-trained multi-speaker model for the target speaker. 
+            Differently, we have relatively enough data to train WaveNet in S2. 
+            Therefore, we only train the WaveNet in S2 using the target speech.
+			</p>
+      
+            
+          </div>
+        </div>
+      </div>
+      
+      <hr>
+      <div class="row" id="result">
+        <div class="col-md-12">
+          <h2>Speech Samples</h2>
+          <p>The voice conversion experiments are conducted on CMU-ARCTIC datasets:
+		  </p>
+		  
+		  <h3>Arctic Database</h3>
+                  <div class="big-screen">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Source</th>
+                          <th>I</th>
+                          <th>II</th>
+						  <th>Proposed</th>
+						  <th>Target</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+						
+						<tr>
+                          <th scope="row"> SLT->BDL (arctic_a0018)</th>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/sltarctic_a0018.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt_bdlarctic_a0018.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt_bdlarctic_a0018(1).wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt000018-checkpoints_model.ckpt-115000.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case1/bdlarctic_a0018.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                        </tr>
+						
+                        
+                        <tr>
+                          <th scope="row"> RMS->BDL (arctic_a0015) </th>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rmsarctic_a0015.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms_bdlarctic_a0015.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms_bdlarctic_a0015 (1).wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms000015-checkpoints_model.ckpt-115000.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case2/bdlarctic_a0015.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                        </tr>
+                        
+                        
+                        <tr>
+                          <th scope="row"> CLB->SLT (arctic_a0005) </th>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/clbarctic_a0005.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/clb_sltarctic_a0005.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case3/clb_sltarctic_a0005 (1).wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/cld000005-checkpoints_model.ckpt-109000.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case3/sltarctic_a0005.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                        </tr>
+                        
+                        
+                        <tr>
+                          <th scope="row"> BDL->SLT (arctic_a0009)  </th>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdlarctic_a0009.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl_sltarctic_a0009.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl_sltarctic_a0009 (1).wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl000009-checkpoints_model.ckpt-109000.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+						  <td>
+                            <audio controls>
+                              <source src="./audio/case4/sltarctic_a0009.wav" type="audio/wav" />
+                            </audio>
+                          </td>
+                        </tr>
+                        
+                        
+                        
+                        
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="small-screen">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>SLT->BDL (arctic_a0018)</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Source</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/sltarctic_a0018.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>I</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt_bdlarctic_a0018.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>II</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt_bdlarctic_a0018(1).wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+						
+                        <tr>
+                          <td>Proposed</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/slt000018-checkpoints_model.ckpt-115000.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Target</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case1/bdlarctic_a0018.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                      
+                      </tbody>
+                    </table>
+                  
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>RMS->BDL (arctic_a0015)</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Source</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rmsarctic_a0015.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>I</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms_bdlarctic_a0015.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>II</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms_bdlarctic_a0015 (1).wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+						
+                        <tr>
+                          <td>Proposed</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/rms000015-checkpoints_model.ckpt-115000.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Target</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case2/bdlarctic_a0015.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                      
+                      </tbody>
+                    </table>
+                    
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>CLB->SLT (arctic_a0005)</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Source</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/clbarctic_a0005.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>I</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/clb_sltarctic_a0005.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>II</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/clb_sltarctic_a0005 (1).wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+						
+                        <tr>
+                          <td>Proposed</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/cld000005-checkpoints_model.ckpt-109000.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Target</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case3/sltarctic_a0005.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                      
+                      </tbody>
+                    </table>
+                    
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>BDL->SLT (arctic_a0009)</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Source</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdlarctic_a0009.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>I</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl_sltarctic_a0009.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>II</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl_sltarctic_a0009 (1).wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Proposed</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/bdl000009-checkpoints_model.ckpt-109000.wav"  type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Target</td>
+                          <td>
+                            <audio controls>
+                              <source src="./audio/case4/sltarctic_a0009.wav" type="audio/wav" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </td>
+                        </tr>
+                      
+                      </tbody>
+                    </table>
+                    
+                    
+                    
+                  </div>
+		  <hr>
+		  
+          
+      <div class="row" id="ref">
+        <div class="col">
+          <h2>References</h2>
+          <div>
+            <p>
+              <a name="1">[1]</a>
+              Xie, Feng-Long and Soong, Frank K and Li, Haifeng “Voice conversion with SI-DNN and KL divergence based mapping 
+                without parallel training data,” in <em>Speech Communication, 2019, pp. 57-67.</em>
+            </p>
+            <p>
+              <a name="2">[2]</a>
+              Liu, Li-Juan and Ling, Zhen-Hua and Jiang, Yuan and Zhou, Ming and Dai, Li-Rong, “WaveNet Vocoder with Limited Training Data 
+              for Voice Conversion,” in <em>Proceedings of the Interspeech, 2018, pp. 1983-1987.</em>
+            </p>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <!-- <div class="row" id="contact">
+          <div class="col">
+            <h2>Contact</h2>
+            <div></div>
+          </div>
+        </div> -->
+    </div>
+  </main>
+  <footer class="bg-secondary text-light mt-4 pt-3 pb-2 ">
+    <div class="container">
+      <p class="text-center">
+        <small>
+          Towards Fine-Grained Prosody Control for Voice Conversion
+          <br>
+          <a class="text-light"><strong>Zheng Lian</strong></a> |
+          lianzheng2016@ia.ac.cn
+        </small>
+      </p>
+    </div>
+  </footer>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
